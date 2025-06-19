@@ -2,7 +2,7 @@
 
 **Official MSc Thesis Project – Zahra Kheiroddin | UE Germany**
 
-DevOps Hub is a production-grade Django platform designed for centralized DevOps orchestration across Jenkins, GitHub Actions, and system-level automation. Built as part of a master's thesis at the University of Europe for Applied Sciences, this project features real-time Redis WebSocket notifications, cross-platform Jenkins installation, and fully integrated GitHub repository workflows.
+OceanRithm is a production grade Django platform designed for centralized DevOps orchestration across Jenkins, GitHub Actions, and system level automation. Built as part of a master's thesis at the University of Europe for Applied Sciences, this project features real time Redis WebSocket notifications, cross-platform Jenkins installation, and fully integrated GitHub repository workflows.
 
 > ⚠️ **License & Ownership**: This project is protected under a custom MIT License with Attribution. Unauthorized redistribution, modification, or submission to journals or academic institutions is strictly prohibited. Any use must include clear reference to Zahra Kheiroddin as the sole original creator.
 
