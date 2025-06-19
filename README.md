@@ -39,7 +39,46 @@ See `LICENSE` file for full terms.
 
 ### ✅ How to Use / Setup
 
-(Include full setup instructions here, unchanged from your current README)
+#### 1. Clone the Project from GitHub
+```bash
+git clone https://github.com/zahrakheiroddin/devops-hub.git
+cd devops-hub
+```
+
+#### 2. Create Virtual Environment & Install Dependencies
+```bash
+python -m venv env
+source env/bin/activate          # macOS/Linux
+# On Windows:
+# env\Scripts\activate
+
+pip install -r requirements.txt
+```
+
+#### 3. Set Up Database & Superuser
+```bash
+python manage.py migrate
+python manage.py createsuperuser
+```
+
+#### 4. Run the Application
+```bash
+python manage.py runserver
+```
+
+#### 5. Access in Your Browser:
+```
+http://127.0.0.1:8000
+```
+
+#### 6. Redis & WebSocket (Optional Advanced Setup)
+If you want to use real-time WebSocket updates:
+- Install Redis: `sudo apt install redis` or use Docker: `docker run -p 6379:6379 redis`
+- Run Django Channels worker
+```bash
+python manage.py runworker
+```
+- Confirm Redis is running on `localhost:6379`
 
 ---
 
