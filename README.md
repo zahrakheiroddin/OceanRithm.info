@@ -45,7 +45,7 @@ See `LICENSE` file for full terms.
 
 ### 📬 Contact / Support
 - GitHub: [github.com/zahrakheiroddin](https://github.com/zahrakheiroddin)
-- Email: `z.kheiroddin@ue-germany.de` *(for academic inquiries only)*
+- Email: `zahra.kheiroddin@ue-germany.de` *(for academic inquiries only)*
 
 ---
 
