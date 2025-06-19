@@ -1,0 +1,15 @@
+name: AutoRun on Upload
+
+                        on:
+                        push:
+                        branches: [main]
+
+                        jobs:
+                        build:
+                        runs-on: ubuntu-latest
+                        steps:
+                            - uses: actions/checkout@v3
+                            - name: Show uploaded files
+                            run: ls -la
+                            - name: Say Hello
+                            run: echo "🚀 GitHub Action triggered successfully!"
