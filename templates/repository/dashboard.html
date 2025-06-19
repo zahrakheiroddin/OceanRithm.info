@@ -1,0 +1,214 @@
+{% extends 'repository/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - GitHub Manager{% endblock %}
+
+{% block content %}
+<!-- Apply Prometheus-Inspired Theme -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        background-color: #f4fbff;
+        color: #1b1e23;
+    }
+
+    h1, h2, h3, h4, h5 {
+        font-weight: 600;
+        color: #003344;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+        background-color: #ffffff;
+        box-shadow: 0 6px 24px rgba(0, 180, 216, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 32px rgba(0, 180, 216, 0.15);
+    }
+
+    .card-header {
+        background: linear-gradient(90deg, #63d5f5 0%, #32b0d7 100%);
+        color: white;
+        font-weight: 600;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+
+    .btn {
+        border-radius: 6px;
+        font-size: 14px;
+        padding: 8px 16px;
+        transition: 0.3s ease;
+    }
+
+    .btn-outline-info {
+        border: 1px solid #63d5f5;
+        color: #63d5f5;
+    }
+
+    .btn-outline-info:hover {
+        background-color: #63d5f5;
+        color: white;
+        box-shadow: 0 5px 15px rgba(0, 180, 216, 0.35);
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #dc3545 !important;
+        color: white !important;
+    }
+
+    .btn-info {
+        background-color: #63d5f5;
+        color: white;
+        border: none;
+    }
+
+    .btn-info:hover {
+        background-color: #40b7d9;
+        color: white;
+        box-shadow: 0 5px 15px rgba(0, 180, 216, 0.35);
+    }
+
+    .alert {
+        background-color: #e0faff;
+        border-left: 5px solid #63d5f5;
+        border-radius: 6px;
+    }
+</style>
+
+<div class="container pt-5 mt-5">
+    <!-- Dashboard Title with Logout -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">
+                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+            </h1>
+            <p class="text-muted m-0">Manage your GitHub integration step-by-step</p>
+        </div>
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-box-arrow-right me-1"></i> Logout
+            </button>
+        </form>
+    </div>
+
+    <!-- Workflow Progress -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="mb-0"><i class="bi bi-diagram-3 me-2"></i> Your GitHub Manager Workflow</h4>
+        </div>
+        <div class="card-body">
+            <div class="row row-cols-1 row-cols-md-3 g-3">
+                <!-- Step 1 -->
+                <div class="col">
+                    <div class="p-3 border rounded h-100 text-center {% if has_github_config %}border-success{% else %}border-warning{% endif %}">
+                        <div class="fs-5 fw-semibold mb-2" style="color: #00B4D8;">1. GitHub Setup</div>
+                        <p class="text-muted small">Configure your GitHub credentials</p>
+                        {% if not has_github_config %}
+                            <a href="{% url 'github_config' %}" class="btn btn-sm btn-outline-info">Configure</a>
+                        {% else %}
+                            <div class="d-flex justify-content-center align-items-center flex-wrap gap-2">
+                                <span class="badge bg-success">Complete</span>
+                                <a href="{% url 'github_config' %}" class="btn btn-sm btn-info">Edit</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Step 2 -->
+                <div class="col">
+                    <div class="p-3 border rounded h-100 text-center {% if repositories %}border-success{% else %}border-warning{% endif %}">
+                        <div class="fs-5 fw-semibold" style="color: #00B4D8;">2. Create Repository</div>
+                        <p class="text-muted small">Create or connect to a repository</p>
+                        {% if has_github_config and not repositories %}
+                        <a href="{% url 'repository_choice' %}" class="btn btn-sm btn-outline-info">
+                            <i class="bi bi-plus-circle me-1"></i> Start
+                        </a>
+                        {% elif repositories %}
+                        <span class="badge bg-success">Complete</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Step 3 -->
+                <div class="col">
+                    <div class="p-3 border rounded h-100 text-center {% if repositories %}border-success{% else %}border-secondary{% endif %}">
+                        <div class="fs-5 fw-semibold" style="color: #00B4D8;">3. Upload Files</div>
+                        <p class="text-muted small">Push your files to GitHub</p>
+                        {% if repositories %}
+                        <a href="{% url 'repository_detail' repositories.first.id %}" class="btn btn-sm btn-outline-info">Upload</a>
+                        {% else %}
+                        <span class="badge bg-secondary">Pending</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if not has_github_config %}
+    <div class="alert alert-warning d-flex justify-content-between align-items-center">
+        <div>
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> GitHub is not configured yet.
+        </div>
+        <a href="{% url 'github_config' %}" class="btn btn-sm btn-warning">Configure Now</a>
+    </div>
+    {% endif %}
+
+    <!-- Repositories List -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0"><i class="bi bi-folder2-open me-2"></i> Your Repositories</h4>
+        </div>
+        <div class="card-body">
+            {% if repositories %}
+            <div class="list-group">
+                {% for repo in repositories %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{% url 'repository_detail' repo.id %}" class="text-decoration-none text-dark">
+                        <h5 class="mb-1">{{ repo.name }}</h5>
+                        <p class="mb-1 text-muted">{{ repo.description|default:"No description" }}</p>
+                        <small class="text-muted">Created: {{ repo.created_at|date:"M d, Y" }}</small>
+                    </a>
+                    <div class="text-end">
+                        <span class="badge {% if repo.is_private %}bg-secondary{% else %}bg-success{% endif %} rounded-pill mb-2">
+                            {% if repo.is_private %}Private{% else %}Public{% endif %}
+                        </span>
+                        <form method="post" action="/githubaction/delete-repository/{{ repo.id }}/" class="d-inline ms-2">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this repository?');">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <p class="mb-3">You don’t have any repositories yet.</p>
+                {% if has_github_config %}
+                <a href="{% url 'repository_choice' %}" class="btn btn-outline-info">
+                    <i class="bi bi-plus-circle me-2"></i> Create or Connect Repository
+                </a>
+                {% else %}
+                <p class="text-muted">Configure GitHub first to begin.</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if has_github_config and repositories %}
+    <div class="text-end mt-4">
+        <a href="{% url 'repository_choice' %}" class="btn btn-info">
+            <i class="bi bi-plus-circle me-1"></i> Add Repository
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

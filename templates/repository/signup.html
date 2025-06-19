@@ -1,0 +1,130 @@
+{% extends 'repository/base.html' %}
+{% load static %}
+
+{% block title %}Sign Up - GitHub Manager{% endblock %}
+
+{% block content %}
+<!-- 🔥 Force Font and Color Styling like GitHub Config Page -->
+<style>
+    html, body, input, button, label, p, h1, h2, h3, h4, h5, h6, span, div, .form-control, .btn, .card {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+        font-weight: 400 !important;
+        font-size: 14.5px;
+        letter-spacing: 0.2px;
+        color: #2e2e2e;
+    }
+
+    h2, h4 {
+        font-weight: 600 !important;
+        color: #00B4D8 !important;
+    }
+
+    .form-label {
+        font-weight: 500 !important;
+        font-size: 14px;
+        color: #00B4D8 !important;
+    }
+
+    .form-control {
+        font-size: 14.5px;
+        color: #2e2e2e;
+    }
+
+    .form-control::placeholder {
+        color: #a0a0a0;
+    }
+
+    .btn {
+        font-size: 14.5px !important;
+        font-weight: 500 !important;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+        font-size: 13px;
+    }
+
+    .input-group-text {
+        background-color: #f9f9f9;
+        color: #6c757d;
+    }
+</style>
+
+<div class="container pt-5 mt-5">
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-8 col-md-10 col-sm-12">
+            <div class="text-md-start text-center">
+                <h2 class="fw-bold">
+                    <i class="bi bi-person-plus me-2"></i> Create Your Account
+                </h2>
+                <p class="text-muted">Sign up to manage your GitHub automation workflows</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sign Up Card -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-sm-12">
+            <div class="card border-0 shadow-sm" style="border-top: 4px solid #00B4D8;">
+                <div class="card-header text-white" style="background-color: #00B4D8;">
+                    <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i> Account Details</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="mb-4 text-start">
+                                <label for="{{ field.id_for_label }}" class="form-label">
+                                    {% if field.name == 'username' %}
+                                        <i class="bi bi-person-circle me-1"></i>
+                                    {% elif field.name == 'email' %}
+                                        <i class="bi bi-envelope-fill me-1"></i>
+                                    {% elif field.name == 'password1' or field.name == 'password2' %}
+                                        <i class="bi bi-lock-fill me-1"></i>
+                                    {% endif %}
+                                    {{ field.label }}
+                                </label>
+                                <div class="input-group shadow-sm">
+                                    <span class="input-group-text border-end-0">
+                                        {% if field.name == 'username' %}
+                                            <i class="bi bi-person"></i>
+                                        {% elif field.name == 'email' %}
+                                            <i class="bi bi-envelope"></i>
+                                        {% elif field.name == 'password1' or field.name == 'password2' %}
+                                            <i class="bi bi-shield-lock"></i>
+                                        {% endif %}
+                                    </span>
+                                    <input 
+                                        type="{{ field.field.widget.input_type }}"
+                                        name="{{ field.html_name }}"
+                                        id="{{ field.id_for_label }}"
+                                        class="form-control border-start-0"
+                                        placeholder="{{ field.label }}"
+                                        {% if field.field.required %} required {% endif %}
+                                    >
+                                </div>
+                                {% if field.help_text %}
+                                    <div class="form-text text-muted small">{{ field.help_text }}</div>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="text-danger small mt-1">{{ field.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn text-white fw-semibold" style="background-color: #00B4D8;">
+                                <i class="bi bi-check-circle me-1"></i> Create Account
+                            </button>
+                            <a href="{% url 'login' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-box-arrow-in-left me-1"></i> Already have an account? Log in
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

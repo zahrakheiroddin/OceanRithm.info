@@ -1,0 +1,514 @@
+{% extends 'repository/base.html' %}
+{% load static %}
+
+{% block title %}Jenkins Configuration - Windows{% endblock %}
+
+{% block content %}
+
+<style>
+.bg-customblue { background-color: #00B4D8 !important; }
+.text-customblue { color: #00B4D8 !important; }
+.border-customblue { border-color: #00B4D8 !important; }
+.btn-outline-customblue {
+    border-color: #00B4D8 !important;
+    color: #00B4D8 !important;
+}
+.btn-outline-customblue:hover {
+    background-color: #00B4D8 !important;
+    color: white !important;
+}
+.btn-customblue {
+    background-color: #00B4D8 !important;
+    color: white !important;
+}
+.btn-customblue:hover {
+    background-color: #009dc7 !important;
+    color: white !important;
+}
+</style>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <!-- Top Bar -->
+            <div class="bg-light py-2 px-3 shadow-sm mb-3">
+                <!-- Main bar placeholder -->
+            </div>
+
+            <!-- Title with Windows icon, now pushed further down -->
+            <div class="d-flex align-items-center mt-5">  <!-- increased from mt-4 to mt-5 -->
+                <div class="bg-customblue rounded-circle p-3 me-3">
+                    <i class="bi bi-windows text-white" style="font-size: 1.8rem;"></i>
+                </div>
+                <h1 class="mb-0 text-customblue">Jenkins Configuration for Windows</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    <!-- System Status -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle text-customblue me-2"></i>System Status
+                    </h5>
+                    <button class="btn btn-outline-customblue btn-sm" onclick="refreshStatus()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Operating System:</strong> {{ os_info.system }}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Version:</strong> {{ os_info.release }}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Architecture:</strong> {{ os_info.machine }}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Machine Type:</strong> {{ os_info.processor }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Java:</strong>
+                                <span id="java-status" class="badge bg-secondary">Checking...</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Docker:</strong>
+                                <span id="docker-status" class="badge bg-secondary">Checking...</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Jenkins:</strong>
+                                <span id="jenkins-status" class="badge bg-secondary">Checking...</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Chocolatey:</strong>
+                                <span id="choco-status" class="badge bg-secondary">Checking...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Installation Options -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-download text-success me-2"></i>Installation Options
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <button class="btn btn-customblue w-100" onclick="installJenkins('msi')">
+                                <i class="bi bi-box-arrow-in-down me-2"></i>Install via MSI
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button class="btn btn-info w-100" onclick="installJenkins('chocolatey')">
+                                <i class="bi bi-box me-2"></i>Install via Chocolatey
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button class="btn btn-secondary w-100" onclick="installJenkins('docker')">
+                                <i class="bi bi-box2 me-2"></i>Install via Docker
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Section -->
+    <div class="row mb-4" id="progress-section" style="display: none;">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-gear text-customblue me-2"></i>Installation Progress
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3">
+                        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div id="progress-messages" class="alert alert-info">
+                        Ready to start installation...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Installation Methods (Manual) -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-terminal text-customblue me-2"></i>Manual Installation Commands
+                    </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- MSI Installer -->
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-customblue shadow-sm h-100">
+                                    <div class="card-header bg-customblue text-white">
+                                        <i class="bi bi-download me-2"></i>MSI Installer
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted">Download and install using the official MSI installer</p>
+                                        <h6>Steps:</h6>
+                                        <ol class="small">
+                                            <li>Download from <a href="https://www.jenkins.io/download/" target="_blank">jenkins.io</a></li>
+                                            <li>Run the MSI installer as Administrator</li>
+                                            <li>Follow the installation wizard</li>
+                                            <li>Service will start automatically</li>
+                                        </ol>
+                                        <div class="mt-3">
+                                            <strong>Default settings:</strong><br>
+                                            <small>
+                                                Location: C:\Program Files\Jenkins<br>
+                                                Service: Jenkins<br>
+                                                Port: 8080<br>
+                                                User: LocalSystem
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    
+                            <!-- Chocolatey Installation -->
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-customblue shadow-sm h-100">
+                                    <div class="card-header bg-customblue text-white">
+                                        <i class="bi bi-box me-2"></i>Chocolatey Installation
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted">Install using Chocolatey package manager</p>
+                                        <small class="d-block bg-light p-2 rounded border">
+                                            <strong>Prerequisites:</strong><br>
+                                            Set-ExecutionPolicy Bypass -Scope Process -Force;<br>
+                                            [System.Net.ServicePointManager]::SecurityProtocol = ...<br>
+                                            iex ((New-Object System.Net.WebClient).DownloadString(...))<br><br>
+                    
+                                            <strong>Install Jenkins:</strong><br>
+                                            choco install jenkins -y<br>
+                                            net start jenkins
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                    
+                            <!-- Docker Installation -->
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-customblue shadow-sm h-100">
+                                    <div class="card-header bg-customblue text-white">
+                                        <i class="bi bi-box2 me-2"></i>Docker Installation
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted">Run Jenkins in a Docker container</p>
+                                        <small class="d-block bg-light p-2 rounded border">
+                                            docker pull jenkins/jenkins:lts<br><br>
+                                            docker run -d -p 8080:8080 -p 50000:50000 \<br>
+                                            &nbsp;&nbsp;--name jenkins \<br>
+                                            &nbsp;&nbsp;-v jenkins_home:/var/jenkins_home \<br>
+                                            &nbsp;&nbsp;jenkins/jenkins:lts<br><br>
+                                            docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+                                        </small>
+                    
+                                        <div class="mt-3">
+                                            <h6 class="small">Docker Compose:</h6>
+                                            <small class="d-block bg-light p-2 rounded border">
+                                                version: '3.8'<br>
+                                                services:<br>
+                                                &nbsp;&nbsp;jenkins:<br>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;image: jenkins/jenkins:lts<br>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;ports:<br>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- "8080:8080"<br>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- "50000:50000"<br>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;volumes:<br>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- jenkins_home:/var/jenkins_home<br>
+                                                volumes:<br>
+                                                &nbsp;&nbsp;jenkins_home:
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+    <!-- Quick Access -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-link-45deg text-info me-2"></i>Quick Access
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="http://localhost:8080" target="_blank" class="btn btn-success w-100">
+                                <i class="bi bi-box-arrow-up-right me-2"></i>Jenkins Interface
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="https://www.jenkins.io/doc/" target="_blank" class="btn btn-info w-100">
+                                <i class="bi bi-book me-2"></i>Documentation
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button class="btn btn-warning w-100" onclick="alert('Open Services Manager manually: Press Windows + R, then type services.msc')">
+                                <i class="bi bi-gear-wide-connected me-2"></i>Services (Help)
+                            </button>
+                            
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'home' %}" class="btn btn-secondary w-100">
+                                <i class="bi bi-house me-2"></i>Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Management Commands Modal -->
+<div class="modal fade" id="managementModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-terminal me-2"></i>Management Commands
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="accordion" id="commandsAccordion">
+                    <!-- Service Management -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#serviceCommands">
+                                <i class="bi bi-gear me-2"></i>Service Management
+                            </button>
+                        </h2>
+                        <div id="serviceCommands" class="accordion-collapse collapse show" data-bs-parent="#commandsAccordion">
+                            <div class="accordion-body">
+                                <div class="bg-dark text-light p-3 rounded">
+                                    <small>
+                                        # Windows Service Commands<br>
+                                        net start jenkins &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Start Jenkins<br>
+                                        net stop jenkins &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Stop Jenkins<br>
+                                        sc query jenkins &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Check status<br>
+                                        sc config jenkins start= auto &nbsp;&nbsp;&nbsp;# Set auto-start<br><br>
+                                        
+                                        # PowerShell Commands<br>
+                                        Start-Service jenkins &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Start Jenkins<br>
+                                        Stop-Service jenkins &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Stop Jenkins<br>
+                                        Get-Service jenkins &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Check status<br>
+                                        Restart-Service jenkins &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Restart Jenkins
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Docker Management -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#dockerCommands">
+                                <i class="bi bi-box2 me-2"></i>Docker Management
+                            </button>
+                        </h2>
+                        <div id="dockerCommands" class="accordion-collapse collapse" data-bs-parent="#commandsAccordion">
+                            <div class="accordion-body">
+                                <div class="bg-dark text-light p-3 rounded">
+                                    <small>
+                                        # Docker Container Management<br>
+                                        docker start jenkins &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Start container<br>
+                                        docker stop jenkins &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Stop container<br>
+                                        docker restart jenkins &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Restart container<br>
+                                        docker logs jenkins &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# View logs<br>
+                                        docker exec -it jenkins bash &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Enter container<br><br>
+                                        
+                                        # Get Initial Password<br>
+                                        docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword<br><br>
+                                        
+                                        # Remove Container<br>
+                                        docker rm -f jenkins &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Remove container
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Locations -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#fileLocations">
+                                <i class="bi bi-folder me-2"></i>Important File Locations
+                            </button>
+                        </h2>
+                        <div id="fileLocations" class="accordion-collapse collapse" data-bs-parent="#commandsAccordion">
+                            <div class="accordion-body">
+                                <div class="bg-dark text-light p-3 rounded">
+                                    <small>
+                                        # Installation Paths<br>
+                                        C:\Program Files\Jenkins &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Default installation<br>
+                                        C:\ProgramData\Jenkins &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Jenkins home<br>
+                                        C:\Windows\System32\config\systemprofile\.jenkins # Service home<br><br>
+                                        
+                                        # Service Configuration<br>
+                                        C:\Program Files\Jenkins\jenkins.exe &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Service executable<br>
+                                        C:\Program Files\Jenkins\jenkins.xml &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Service config<br><br>
+                                        
+                                        # Log Files<br>
+                                        C:\Program Files\Jenkins\jenkins.out.log &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Console output<br>
+                                        C:\Program Files\Jenkins\jenkins.err.log &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Error log
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Troubleshooting -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#troubleshooting">
+                                <i class="bi bi-exclamation-triangle me-2"></i>Troubleshooting
+                            </button>
+                        </h2>
+                        <div id="troubleshooting" class="accordion-collapse collapse" data-bs-parent="#commandsAccordion">
+                            <div class="accordion-body">
+                                <div class="bg-dark text-light p-3 rounded">
+                                    <small>
+                                        # Check Java Installation<br>
+                                        java -version &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Check Java version<br>
+                                        where java &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Find Java path<br><br>
+                                        
+                                        # Check Jenkins Logs<br>
+                                        type "C:\Program Files\Jenkins\jenkins.out.log" &nbsp;&nbsp;# View output log<br>
+                                        type "C:\Program Files\Jenkins\jenkins.err.log" &nbsp;&nbsp;# View error log<br><br>
+                                        
+                                        # Check Port Usage<br>
+                                        netstat -an | findstr :8080 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Check if port is in use<br><br>
+                                        
+                                        # Firewall Configuration<br>
+                                        netsh advfirewall firewall add rule name="Jenkins" dir=in action=allow protocol=TCP localport=8080
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Status check and installation functions
+function refreshStatus() {
+    fetch('{% url "jenkins:check_jenkins_status_windows" %}')
+        .then(response => response.json())
+        .then(data => {
+            updateStatusBadge('java-status', data.java_installed, 'Java');
+            updateStatusBadge('docker-status', data.docker_installed, 'Docker');
+            updateStatusBadge('jenkins-status', data.jenkins_installed, 'Jenkins');
+            updateStatusBadge('choco-status', data.choco_installed, 'Chocolatey');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+function updateStatusBadge(elementId, isInstalled, name) {
+    const element = document.getElementById(elementId);
+    if (isInstalled) {
+        element.className = 'badge bg-success';
+        element.innerHTML = `<i class="bi bi-check-circle me-1"></i>Installed`;
+    } else {
+        element.className = 'badge bg-danger';
+        element.innerHTML = `<i class="bi bi-x-circle me-1"></i>Not Installed`;
+    }
+}
+
+function installJenkins(method) {
+    showProgress();
+    
+    const data = new FormData();
+    data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    data.append('installation_type', method);
+    
+    fetch('{% url "jenkins:jenkins_config_windows" %}', {
+        method: 'POST',
+        body: data
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            updateProgress(100, 'Installation completed successfully!', 'success');
+            setTimeout(() => {
+                hideProgress();
+                refreshStatus();
+            }, 2000);
+        } else {
+            updateProgress(0, `Installation failed: ${data.message}`, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        updateProgress(0, 'Installation failed due to network error', 'danger');
+    });
+}
+
+function showProgress() {
+    document.getElementById('progress-section').style.display = 'block';
+    updateProgress(0, 'Starting installation...', 'info');
+}
+
+function hideProgress() {
+    document.getElementById('progress-section').style.display = 'none';
+}
+
+function updateProgress(percentage, message, type) {
+    const progressBar = document.getElementById('progress-bar');
+    const progressMessages = document.getElementById('progress-messages');
+    
+    progressBar.style.width = percentage + '%';
+    progressBar.setAttribute('aria-valuenow', percentage);
+    
+    progressMessages.className = `alert alert-${type}`;
+    progressMessages.textContent = message;
+}
+
+// Load status on page load
+document.addEventListener('DOMContentLoaded', function() {
+    refreshStatus();
+});
+</script>
+{% endblock %}

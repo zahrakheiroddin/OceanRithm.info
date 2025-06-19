@@ -1,0 +1,216 @@
+{% extends 'repository/base.html' %}
+
+{% block title %}Connect Existing Repository - GitHub Manager{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        background-color: #f4fbff;
+        color: #1b1e23;
+        text-align: left;
+    }
+    h1, h2, h3, h4, h5 {
+        font-weight: 600;
+        color: #003344;
+    }
+    .card {
+        border: none;
+        border-radius: 10px;
+        background-color: #ffffff;
+        box-shadow: 0 6px 24px rgba(0, 180, 216, 0.1);
+    }
+    .card-header {
+        background: linear-gradient(90deg, #63d5f5 0%, #32b0d7 100%);
+        color: white;
+        font-weight: 600;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+    .btn {
+        border-radius: 6px;
+        font-size: 14px;
+        padding: 10px 20px;
+        transition: 0.3s ease;
+    }
+    .btn-outline-secondary:hover {
+        background-color: #dee2e6;
+        color: black;
+    }
+    .btn-info {
+        background-color: #63d5f5;
+        color: white;
+        border: none;
+    }
+    .btn-info:hover {
+        background-color: #40b7d9;
+        color: white;
+    }
+    .form-control {
+        font-size: 14px;
+        border-radius: 6px;
+        padding: 10px 16px;
+        border: 1px solid #d0eaf2;
+        background-color: #f9fdff;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+        transition: border-color 0.3s, box-shadow 0.3s;
+        width: 100%;
+    }
+    .form-control:focus {
+        border-color: #63d5f5;
+        box-shadow: 0 0 5px rgba(99, 213, 245, 0.6);
+    }
+    textarea.form-control {
+        height: 100px;
+        resize: vertical;
+    }
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+        color: #00B4D8;
+    }
+    .bottom-spacing {
+        margin-bottom: 80px;
+    }
+    .card-wrapper {
+        margin-top: 20px;
+        margin-bottom: 40px;
+    }
+    .alert-info p,
+    .accordion-body p,
+    .accordion-body ul {
+        text-align: left !important;
+    }
+</style>
+
+<div class="container pt-5 mt-3 bottom-spacing">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="d-flex justify-content-end mb-4">
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-box-arrow-right me-1"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center card-wrapper">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0"><i class="bi bi-link-45deg me-2"></i> Connect Existing Repository</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <p class="mb-2"><i class="bi bi-info-circle-fill me-1"></i> Enter the name of an existing repository that you own on GitHub.</p>
+                        <p class="mb-0"><i class="bi bi-info-circle me-1"></i> Make sure your GitHub token has access to this repository.</p>
+                    </div>
+
+                    {% if error %}
+                    <div class="alert alert-danger">
+                        <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill me-1"></i> Error</h5>
+                        <p>{{ error }}</p>
+
+                        {% if repo_exists_on_github %}
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6>Repository Information:</h6>
+                                <ul>
+                                    <li><strong>Name:</strong> {{ github_repo_info.name }}</li>
+                                    <li><strong>URL:</strong> <a href="{{ github_repo_info.html_url }}" target="_blank">{{ github_repo_info.html_url }}</a></li>
+                                    <li><strong>Default Branch:</strong> {{ github_repo_info.default_branch }}</li>
+                                    <li><strong>Created:</strong> {{ github_repo_info.created_at|date:"F j, Y" }}</li>
+                                </ul>
+                                <p>The repository exists on GitHub, but we encountered an error connecting to it. Please try again.</p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <img src="{{ github_repo_info.owner.avatar_url }}" alt="Owner avatar" class="img-thumbnail mb-2" style="width: 80px;">
+                                <br>
+                                <a href="{% url 'new_repository' %}" class="btn btn-sm text-white mt-2" style="background-color: #00B4D8;">
+                                    <i class="bi bi-plus-circle me-1"></i> Create New Instead
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-4 text-start">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                <i class="bi bi-pencil-square me-1"></i> Repository Name
+                            </label>
+                            {{ form.name.errors }}
+                            <input type="text" name="name" id="{{ form.name.id_for_label }}" value="{{ form.name.value|default:'' }}" class="form-control" required>
+                            <div class="form-text text-muted">Enter the exact name of your existing GitHub repository.</div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-info">
+                                <i class="bi bi-link me-1"></i> Connect Repository
+                            </button>
+                            <a href="{% url 'repository_choice' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg me-1"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-question-circle me-1"></i> Common Issues</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="accordionIssues">
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRepoNotFound">
+                                    Repository Not Found
+                                </button>
+                            </h2>
+                            <div id="collapseRepoNotFound" class="accordion-collapse collapse" data-bs-parent="#accordionIssues">
+                                <div class="accordion-body">
+                                    <p class="text-start">This happens when the repository name does not exist in your GitHub account. Possible solutions:</p>
+                                    <ul class="text-start">
+                                        <li>Check the spelling of the repository name</li>
+                                        <li>Use the exact name, not the full URL</li>
+                                        <li>Ensure your GitHub token has permission</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEmptyRepo">
+                                    Empty Repository Error
+                                </button>
+                            </h2>
+                            <div id="collapseEmptyRepo" class="accordion-collapse collapse" data-bs-parent="#accordionIssues">
+                                <div class="accordion-body">
+                                    <p class="text-start">If your repo is completely empty (no branches, no commits), the system might fail to connect. Try this:</p>
+                                    <ul class="text-start">
+                                        <li>Initialize with a README on GitHub</li>
+                                        <li>Or create a new repository instead</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

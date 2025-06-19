@@ -1,0 +1,177 @@
+/* Custom styles for GitHub Manager */
+
+/* Emoji icons */
+.emoji-icon {
+    font-size: 1.2em;
+    margin-right: 0.3em;
+}
+
+/* Card styling */
+.card-header {
+    font-weight: 500;
+    padding: 0.75rem 1.25rem;
+}
+.card {
+    min-height: 180px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
+}
+.card-body {
+    text-align: center;
+}
+
+.badge {
+    font-size: 0.9rem;
+}
+
+.card {
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.status-section {
+    padding-top: 100px; /* Adjust based on navbar height */
+}
+
+
+/* Button styling */
+.btn {
+    border-radius: 0.3rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+}
+
+/* Form styling */
+.form-control:focus,
+.form-select:focus {
+    border-color: #5e72e4;
+    box-shadow: 0 0 0 0.2rem rgba(94, 114, 228, 0.25);
+}
+
+/* Navigation bar */
+.navbar {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* Footer styling */
+.footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    font-size: 0.875rem;
+    padding: 1.5rem 0;
+}
+
+/* List group styling */
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 0.75rem 1.25rem;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+/* Utility classes */
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* Workflow Steps */
+.workflow-steps {
+    margin: 20px 0;
+}
+
+.step {
+    position: relative;
+    padding: 15px 10px;
+    transition: all 0.3s ease;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-weight: bold;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.step-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.step-description {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+/* Active step */
+.step-active .step-circle {
+    background-color: #007bff;
+    color: white;
+    box-shadow: 0 0 0 5px rgba(0, 123, 255, 0.2);
+}
+
+.step-active .step-title {
+    color: #007bff;
+}
+
+/* Completed step */
+.step-complete .step-circle {
+    background-color: #28a745;
+    color: white;
+}
+
+.step-complete .step-circle:after {
+    content: "✓";
+    font-weight: bold;
+}
+
+/* Disabled step */
+.step-disabled {
+    opacity: 0.5;
+}
+
+/* Horizontal connector between steps */
+.step:not(:last-child):after {
+    content: "";
+    position: absolute;
+    top: 35px;
+    right: -50%;
+    width: 100%;
+    height: 2px;
+    background-color: #e9ecef;
+    z-index: 1;
+}
+
+.step-complete:not(:last-child):after {
+    background-color: #28a745;
+}
+
+/* Breadcrumb styling */
+.breadcrumb {
+    background-color: #f8f9fa;
+    border-radius: 0.3rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+} 

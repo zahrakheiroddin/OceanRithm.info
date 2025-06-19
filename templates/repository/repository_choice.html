@@ -1,0 +1,113 @@
+{% extends 'repository/base.html' %}
+
+{% block title %}Choose Repository Type - GitHub Manager{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        background-color: #f4fbff;
+        color: #1b1e23;
+    }
+    h1, h2, h3, h4, h5 {
+        font-weight: 600;
+        color: #003344;
+    }
+    .card {
+        border: none;
+        border-radius: 10px;
+        background-color: #ffffff;
+        box-shadow: 0 6px 24px rgba(0, 180, 216, 0.1);
+    }
+    .card-header {
+        background: linear-gradient(90deg, #63d5f5 0%, #32b0d7 100%);
+        color: white;
+        font-weight: 600;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+    .btn {
+        border-radius: 6px;
+        font-size: 14px;
+        padding: 8px 16px;
+        transition: 0.3s ease;
+    }
+    .btn-outline-secondary:hover {
+        background-color: #dee2e6;
+        color: black;
+    }
+    .btn-info {
+        background-color: #63d5f5;
+        color: white;
+        border: none;
+    }
+    .btn-info:hover {
+        background-color: #40b7d9;
+        color: white;
+    }
+</style>
+
+<div class="container mt-5 pt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">
+                <i class="bi bi-git me-2"></i> Choose Repository Type
+            </h2>
+            <p class="text-muted mb-0">Start by creating or connecting a GitHub repository</p>
+        </div>
+        <div>
+            <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i> Logout
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i> Create New Repository</h4>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text flex-grow-1">
+                        Create a brand new GitHub repository that will be initialized with a README and GitHub Actions workflow.
+                    </p>
+                    <div class="d-grid">
+                        <a href="{% url 'new_repository' %}" class="btn btn-info mt-auto">
+                            <i class="bi bi-plus-circle me-1"></i> Create New Repository
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="bi bi-link-45deg me-2"></i> Use Existing Repository</h4>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text flex-grow-1">
+                        Connect to an existing GitHub repository to upload files and manage content.
+                    </p>
+                    <div class="d-grid">
+                        <a href="{% url 'existing_repository' %}" class="btn btn-info mt-auto">
+                            <i class="bi bi-link-45deg me-1"></i> Use Existing Repository
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'githubaction_dashboard' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

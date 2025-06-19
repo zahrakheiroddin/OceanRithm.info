@@ -1,0 +1,83 @@
+{% extends 'repository/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Logo at the top center -->
+    <div class="text-center mb-4">
+        <img src="{% static 'images/jenkins1.png' %}" alt="OceanRithm Logo" style="height: 100px;">
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header text-white" style="background-color: #00B4D8;">
+                    <h3 class="mb-0"><i class="bi bi-gear-fill me-2"></i> Jenkins Configuration</h3>
+                </div>
+                <div class="card-body">
+                    <h4 class="mb-3" style="color: #00B4D8;">System Information</h4>
+                    <div class="alert" style="background-color: #e3f7fb; border-color: #00B4D8;">
+                        <p><strong>Detected Operating System:</strong> {{ os_info.system }} {{ os_info.release }}</p>
+
+                        <div class="table-responsive mt-3">
+                            <table class="table table-bordered">
+                                <thead style="background-color: #00B4D8; color: white;">
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for key, value in os_info.items %}
+                                    <tr>
+                                        <td><strong>{{ key|title }}</strong></td>
+                                        <td>{{ value }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <h4 class="mb-3" style="color: #00B4D8;">Choose Your Platform</h4>
+                    <div class="row">
+                        <!-- Windows -->
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-windows mb-3" style="font-size: 3rem; color: #00B4D8;"></i>
+                                    <h5 style="color: #00B4D8;">Windows</h5>
+                                    <p>Configure Jenkins for Windows systems</p>
+                                    <a href="{% url 'jenkins:jenkins_config_windows' %}" class="btn btn-outline-info" style="border-color: #00B4D8; color: #00B4D8;">Configure</a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Linux -->
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-ubuntu mb-3" style="font-size: 3rem; color: #00B4D8;"></i>
+                                    <h5 style="color: #00B4D8;">Linux</h5>
+                                    <p>Configure Jenkins for Linux systems</p>
+                                    <a href="{% url 'jenkins:jenkins_config_linux' %}" class="btn btn-outline-info" style="border-color: #00B4D8; color: #00B4D8;">Configure</a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- macOS -->
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-apple mb-3" style="font-size: 3rem; color: #00B4D8;"></i>
+                                    <h5 style="color: #00B4D8;">macOS</h5>
+                                    <p>Configure Jenkins for macOS systems</p>
+                                    <a href="{% url 'jenkins:jenkins_config_mac' %}" class="btn btn-outline-info" style="border-color: #00B4D8; color: #00B4D8;">Configure</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- row -->
+                </div> <!-- card-body -->
+            </div> <!-- card -->
+        </div> <!-- col -->
+    </div> <!-- row -->
+</div> <!-- container -->
+{% endblock %}

@@ -1,0 +1,231 @@
+{% extends 'repository/base.html' %}
+{% block title %}{{ repository.name }} - GitHub Manager{% endblock %}
+{% block content %}
+
+<!-- Modern Font & Theme Styling -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        background-color: #f4fbff;
+        color: #1b1e23;
+    }
+
+    h1, h2, h3, h4, h5 {
+        font-weight: 600;
+        color: #003344;
+    }
+
+    .container {
+        padding-top: 40px;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+        background-color: #ffffff;
+        box-shadow: 0 6px 24px rgba(0, 180, 216, 0.1);
+    }
+
+    .card-header {
+        background: linear-gradient(90deg, #63d5f5 0%, #32b0d7 100%);
+        color: white;
+        font-weight: 600;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+
+    .btn {
+        border-radius: 6px;
+        font-size: 14px;
+        padding: 8px 16px;
+        transition: 0.3s ease;
+    }
+
+    .btn-primary, .btn.text-white {
+        background-color: #63d5f5;
+        border: 1px solid #63d5f5;
+        color: white;
+        box-shadow: 0 3px 10px rgba(0, 180, 216, 0.2);
+    }
+
+    .btn-primary:hover, .btn.text-white:hover {
+        background-color: #40b7d9;
+        box-shadow: 0 5px 15px rgba(0, 180, 216, 0.35);
+    }
+
+    .form-control {
+        border-radius: 6px;
+        border: 1px solid #d0f0fb;
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .form-control:focus {
+        border-color: #63d5f5;
+        box-shadow: 0 0 8px rgba(99, 213, 245, 0.3);
+    }
+
+    .list-group-item {
+        font-size: 14px;
+        border: none;
+        border-bottom: 1px solid #e5f7fb;
+    }
+
+    .badge {
+        border-radius: 6px;
+        padding: 5px 10px;
+        font-size: 13px;
+        background-color: #63d5f5;
+        color: white;
+    }
+
+    .alert {
+        background-color: #e0faff;
+        border-left: 5px solid #63d5f5;
+        border-radius: 6px;
+    }
+
+    .breadcrumb a {
+        color: #33acc6;
+        font-weight: 500;
+    }
+
+    .breadcrumb-item.active {
+        color: #444;
+        font-weight: 500;
+    }
+
+    .text-muted {
+        color: #617780 !important;
+    }
+
+    a {
+        color: #30b5dc;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+        color: #2188a6;
+    }
+</style>
+
+<div class="container mt-5 pt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">
+                <i class="bi bi-folder-fill me-2"></i> {{ repository.name }}
+            </h1>
+            <p class="text-muted mb-0">Manage and upload files to this repository</p>
+        </div>
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-box-arrow-right me-1"></i> Logout
+            </button>
+        </form>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i> Repository Info</h5>
+                    <span class="badge {% if repository.is_private %}bg-secondary{% else %}bg-success{% endif %}">
+                        {% if repository.is_private %}Private{% else %}Public{% endif %}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">{{ repository.description|default:"No description provided." }}</p>
+                    <p><strong>GitHub URL:</strong> <a href="{{ repository.url }}" target="_blank">{{ repository.url }}</a></p>
+                    <p><strong>Created:</strong> {{ repository.created_at|date:"F j, Y, g:i a" }}</p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-files me-2"></i> Repository Files</h5>
+                </div>
+                <div class="card-body">
+                    {% if breadcrumbs %}
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-3">
+                            {% for crumb in breadcrumbs %}
+                            <li class="breadcrumb-item {% if forloop.last %}active{% endif %}">
+                                {% if not forloop.last %}
+                                <a href="{% if crumb.path %}{% url 'repository_browse' repository.id crumb.path %}{% else %}{% url 'repository_detail' repository.id %}{% endif %}">{{ crumb.name }}</a>
+                                {% else %}{{ crumb.name }}{% endif %}
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    </nav>
+                    {% endif %}
+
+                    {% if directories or files %}
+                    <div class="list-group" style="max-height: 400px; overflow-y: auto;">
+                        {% for dir in directories %}
+                        <a href="{% url 'repository_browse' repository.id dir.path %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-folder-fill text-warning me-2"></i> {{ dir.name }}/
+                        </a>
+                        {% endfor %}
+                        {% for file in files %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div><i class="bi bi-file-earmark me-2" style="color: #00B4D8;"></i>{{ file.name }}</div>
+                            <span class="badge bg-secondary">{{ file.size|filesizeformat }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info text-center mt-2">This directory is empty. Upload some files to get started!</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-upload me-2"></i> Upload File</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" action="{% if current_path %}{% url 'repository_browse' repository.id current_path %}{% else %}{% url 'repository_browse_root' repository.id %}{% endif %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <input type="file" name="file" class="form-control">
+                            <div class="form-text">Choose a file to upload</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn text-white">Upload File</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-folder-plus me-2"></i> Upload Folder</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" action="{% if current_path %}{% url 'repository_browse' repository.id current_path %}{% else %}{% url 'repository_browse_root' repository.id %}{% endif %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <input type="file" name="folder" webkitdirectory directory multiple class="form-control">
+                            <div class="form-text">Select an entire folder to upload</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn text-white" name="multiple_upload">Upload Folder</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <a href="{% url 'githubaction_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left-circle me-1"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
