@@ -1,4 +1,4 @@
-# 🚀 DevOps Hub
+# OceanRithm
 
 **Official MSc Thesis Project – Zahra Kheiroddin | UE Germany**
 
